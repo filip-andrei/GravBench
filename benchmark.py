@@ -62,6 +62,37 @@ def propag_rk4(pos, vel, dt):
     return new_pos, new_vel
 
 
+def hermite_predict(pos, vel, dt):
+    dist = math.sqrt(pos[0] ** 2 + pos[1] ** 2)
+    direction = -pos / dist
+    acc = get_acc(pos)
+    jerk = (G * central_mass) / (dist ** 3) * (vel - 3 * ((pos * vel) / dist) * direction)
+
+    new_pos = pos + vel * dt + acc * dt * dt / 2 + jerk * dt * dt * dt / 6
+    new_vel = vel + acc * dt + jerk * dt * dt / 2
+
+    return new_pos, new_vel, acc, jerk
+
+
+def hermite_correct(pos, vel, temp_pos, temp_vel, old_acc, old_jerk, dt):
+    dist = math.sqrt(temp_pos[0] ** 2 + temp_pos[1] ** 2)
+    direction = -temp_pos / dist
+    acc = get_acc(temp_pos)
+    jerk = (G * central_mass) / (dist ** 3) * (temp_vel - 3 * ((temp_pos * temp_vel) / dist) * direction)
+
+    new_vel = vel + (old_acc + acc) * dt/2 + (old_jerk - jerk) * dt * dt/12
+    new_pos = pos + (vel + new_vel) * dt/2 + (old_acc - acc) * dt * dt/12
+
+    return new_pos, new_vel
+
+
+def propag_hermite(pos, vel, dt):
+    temp_pos, temp_vel, old_acc, old_jerk = hermite_predict(pos, vel, dt)
+    new_pos, new_vel = hermite_correct(pos, vel, temp_pos, temp_vel, old_acc, old_jerk, dt)
+
+    return new_pos, new_vel
+
+
 def propagate(pos_0, vel_0, propag_func, dt, max_steps):
     positions = [pos_0]
     velocities = [vel_0]
@@ -77,31 +108,55 @@ def propagate(pos_0, vel_0, propag_func, dt, max_steps):
     return positions, velocities
 
 
-pos_0 = np.array([0, 42e6])
-vel_0 = np.array([3.1e3, 0])
+pos_0 = np.array([0, 6.6e6])
+vel_0 = np.array([6.9e3, 0])
 
-step_size = 3600
-steps = 24
+step_size = 50
+steps = 80
+
+positions, velocities = propagate(pos_0, vel_0, propag_forward_euler, step_size, steps)
+energies = get_orbit_energy(positions, velocities)
+x = [pos[0] for pos in positions]
+y = [pos[1] for pos in positions]
+pyplot.figure(1)
+pyplot.plot(x, y, linestyle="-", color="blue")
+pyplot.figure(2)
+pyplot.plot(energies, linestyle="-", color="blue")
 
 positions, velocities = propagate(pos_0, vel_0, propag_backward_euler, step_size, steps)
 energies = get_orbit_energy(positions, velocities)
 x = [pos[0] for pos in positions]
 y = [pos[1] for pos in positions]
-pyplot.plot(x, y, linestyle="-", color="blue")
-#pyplot.plot(energies, linestyle="-", color="blue")
+pyplot.figure(1)
+pyplot.plot(x, y, linestyle="--", color="red")
+pyplot.figure(2)
+pyplot.plot(energies, linestyle="--", color="red")
 
 positions, velocities = propagate(pos_0, vel_0, propag_rk2, step_size, steps)
 energies = get_orbit_energy(positions, velocities)
 x = [pos[0] for pos in positions]
 y = [pos[1] for pos in positions]
-pyplot.plot(x, y, linestyle="--", color="red")
-#pyplot.plot(energies, linestyle="--", color="red")
+pyplot.figure(1)
+pyplot.plot(x, y, linestyle="-.", color="orange")
+pyplot.figure(2)
+pyplot.plot(energies, linestyle="-.", color="orange")
 
 positions, velocities = propagate(pos_0, vel_0, propag_rk4, step_size, steps)
 energies = get_orbit_energy(positions, velocities)
 x = [pos[0] for pos in positions]
 y = [pos[1] for pos in positions]
-pyplot.plot(x, y, linestyle="-.", color="black")
-#pyplot.plot(energies, linestyle="-.", color="pink")
+pyplot.figure(1)
+pyplot.plot(x, y, linestyle=":", color="black")
+pyplot.figure(2)
+pyplot.plot(energies, linestyle=":", color="black")
+
+positions, velocities = propagate(pos_0, vel_0, propag_hermite, step_size, steps)
+energies = get_orbit_energy(positions, velocities)
+x = [pos[0] for pos in positions]
+y = [pos[1] for pos in positions]
+pyplot.figure(1)
+pyplot.plot(x, y, linestyle="-", color="fuchsia")
+pyplot.figure(2)
+pyplot.plot(energies, linestyle="-", color="fuchsia")
 
 pyplot.show()
