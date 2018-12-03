@@ -47,6 +47,21 @@ def propag_rk2(pos, vel, dt):
     return new_pos, new_vel
 
 
+def propag_rk4(pos, vel, dt):
+    k1v = get_acc(pos)
+    k1r = vel
+    k2v = get_acc(pos + k1r * dt/2)
+    k2r = vel + k1v * dt/2
+    k3v = get_acc(pos + k2r * dt/2)
+    k3r = vel + k2v * dt/2
+    k4v = get_acc(pos + k3r * dt)
+    k4r = vel + k3v * dt
+
+    new_vel = vel + dt/6 * (k1v + 2 * k2v + 2 * k3v + k4v)
+    new_pos = pos + dt/6 * (k1r + 2 * k2r + 2 * k3r + k4r)
+    return new_pos, new_vel
+
+
 def propagate(pos_0, vel_0, propag_func, dt, max_steps):
     positions = [pos_0]
     velocities = [vel_0]
@@ -66,20 +81,27 @@ pos_0 = np.array([0, 42e6])
 vel_0 = np.array([3.1e3, 0])
 
 step_size = 3600
-steps = 100
+steps = 24
 
 positions, velocities = propagate(pos_0, vel_0, propag_backward_euler, step_size, steps)
 energies = get_orbit_energy(positions, velocities)
-# x = [pos[0] for pos in positions]
-# y = [pos[1] for pos in positions]
-# pyplot.plot(x, y, linestyle="-", color="blue")
-pyplot.plot(energies, linestyle="-", color="blue")
+x = [pos[0] for pos in positions]
+y = [pos[1] for pos in positions]
+pyplot.plot(x, y, linestyle="-", color="blue")
+#pyplot.plot(energies, linestyle="-", color="blue")
 
 positions, velocities = propagate(pos_0, vel_0, propag_rk2, step_size, steps)
 energies = get_orbit_energy(positions, velocities)
-# x = [pos[0] for pos in positions]
-# y = [pos[1] for pos in positions]
-# pyplot.plot(x, y, linestyle="--", color="red")
-pyplot.plot(energies, linestyle="--", color="red")
+x = [pos[0] for pos in positions]
+y = [pos[1] for pos in positions]
+pyplot.plot(x, y, linestyle="--", color="red")
+#pyplot.plot(energies, linestyle="--", color="red")
+
+positions, velocities = propagate(pos_0, vel_0, propag_rk4, step_size, steps)
+energies = get_orbit_energy(positions, velocities)
+x = [pos[0] for pos in positions]
+y = [pos[1] for pos in positions]
+pyplot.plot(x, y, linestyle="-.", color="black")
+#pyplot.plot(energies, linestyle="-.", color="pink")
 
 pyplot.show()
