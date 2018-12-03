@@ -112,51 +112,20 @@ pos_0 = np.array([0, 6.6e6])
 vel_0 = np.array([6.9e3, 0])
 
 step_size = 50
-steps = 80
+steps = 200
 
-positions, velocities = propagate(pos_0, vel_0, propag_forward_euler, step_size, steps)
-energies = get_orbit_energy(positions, velocities)
-x = [pos[0] for pos in positions]
-y = [pos[1] for pos in positions]
-pyplot.figure(1)
-pyplot.plot(x, y, linestyle="-", color="blue")
-pyplot.figure(2)
-pyplot.plot(energies, linestyle="-", color="blue")
+integrators = [propag_forward_euler, propag_backward_euler, propag_rk2, propag_rk4, propag_hermite]
+linestyles = ["-", "--", "-.", ":", "-"]
+colors = ["blue", "red", "orange", "black", "fuchsia"]
 
-positions, velocities = propagate(pos_0, vel_0, propag_backward_euler, step_size, steps)
-energies = get_orbit_energy(positions, velocities)
-x = [pos[0] for pos in positions]
-y = [pos[1] for pos in positions]
-pyplot.figure(1)
-pyplot.plot(x, y, linestyle="--", color="red")
-pyplot.figure(2)
-pyplot.plot(energies, linestyle="--", color="red")
-
-positions, velocities = propagate(pos_0, vel_0, propag_rk2, step_size, steps)
-energies = get_orbit_energy(positions, velocities)
-x = [pos[0] for pos in positions]
-y = [pos[1] for pos in positions]
-pyplot.figure(1)
-pyplot.plot(x, y, linestyle="-.", color="orange")
-pyplot.figure(2)
-pyplot.plot(energies, linestyle="-.", color="orange")
-
-positions, velocities = propagate(pos_0, vel_0, propag_rk4, step_size, steps)
-energies = get_orbit_energy(positions, velocities)
-x = [pos[0] for pos in positions]
-y = [pos[1] for pos in positions]
-pyplot.figure(1)
-pyplot.plot(x, y, linestyle=":", color="black")
-pyplot.figure(2)
-pyplot.plot(energies, linestyle=":", color="black")
-
-positions, velocities = propagate(pos_0, vel_0, propag_hermite, step_size, steps)
-energies = get_orbit_energy(positions, velocities)
-x = [pos[0] for pos in positions]
-y = [pos[1] for pos in positions]
-pyplot.figure(1)
-pyplot.plot(x, y, linestyle="-", color="fuchsia")
-pyplot.figure(2)
-pyplot.plot(energies, linestyle="-", color="fuchsia")
+for i in range(len(integrators)):
+    positions, velocities = propagate(pos_0, vel_0, integrators[i], step_size, steps)
+    energies = get_orbit_energy(positions, velocities)
+    x = [pos[0] for pos in positions]
+    y = [pos[1] for pos in positions]
+    pyplot.figure(1)
+    pyplot.plot(x, y, linestyle=linestyles[i], color=colors[i])
+    pyplot.figure(2)
+    pyplot.plot(energies, linestyle=linestyles[i], color=colors[i])
 
 pyplot.show()
