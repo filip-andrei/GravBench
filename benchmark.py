@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from matplotlib import pyplot
+from matplotlib.lines import Line2D
 
 G = 6.67408e-11  # m3 / (kg s^2)
 central_mass = 5.972e24  # kg
@@ -114,9 +115,11 @@ vel_0 = np.array([6.9e3, 0])
 step_size = 50
 steps = 200
 
+legend_desc = [ "Forward Euler", "Backward Euler", "Runge-Kutta 2", "Runge-Kutta 4", "Hermite" ]
 integrators = [propag_forward_euler, propag_backward_euler, propag_rk2, propag_rk4, propag_hermite]
 linestyles = ["-", "--", "-.", ":", "-"]
 colors = ["blue", "red", "orange", "black", "fuchsia"]
+legend = []
 
 for i in range(len(integrators)):
     positions, velocities = propagate(pos_0, vel_0, integrators[i], step_size, steps)
@@ -127,5 +130,10 @@ for i in range(len(integrators)):
     pyplot.plot(x, y, linestyle=linestyles[i], color=colors[i])
     pyplot.figure(2)
     pyplot.plot(energies, linestyle=linestyles[i], color=colors[i])
+    legend.append(Line2D([0], [0], linestyle=linestyles[i], color=colors[i], label=legend_desc[i]))
 
+pyplot.figure(1)
+pyplot.legend(handles=legend)
+pyplot.figure(2)
+pyplot.legend(handles=legend)
 pyplot.show()
