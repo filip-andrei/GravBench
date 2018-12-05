@@ -67,7 +67,7 @@ def hermite_predict(pos, vel, dt):
     dist = math.sqrt(pos[0] ** 2 + pos[1] ** 2)
     direction = -pos / dist
     acc = get_acc(pos)
-    jerk = (G * central_mass) / (dist ** 3) * (vel - 3 * ((pos * vel) / dist) * direction)
+    jerk = (G * central_mass) / (dist ** 3) * (vel - 3 * (np.dot(pos, vel) / dist) * direction)
 
     new_pos = pos + vel * dt + acc * dt * dt / 2 + jerk * dt * dt * dt / 6
     new_vel = vel + acc * dt + jerk * dt * dt / 2
@@ -79,7 +79,7 @@ def hermite_correct(pos, vel, temp_pos, temp_vel, old_acc, old_jerk, dt):
     dist = math.sqrt(temp_pos[0] ** 2 + temp_pos[1] ** 2)
     direction = -temp_pos / dist
     acc = get_acc(temp_pos)
-    jerk = (G * central_mass) / (dist ** 3) * (temp_vel - 3 * ((temp_pos * temp_vel) / dist) * direction)
+    jerk = (G * central_mass) / (dist ** 3) * (temp_vel - 3 * (np.dot(temp_pos, temp_vel) / dist) * direction)
 
     new_vel = vel + (old_acc + acc) * dt/2 + (old_jerk - jerk) * dt * dt/12
     new_pos = pos + (vel + new_vel) * dt/2 + (old_acc - acc) * dt * dt/12
@@ -112,8 +112,8 @@ def propagate(pos_0, vel_0, propag_func, dt, max_steps):
 pos_0 = np.array([0, 6.6e6])
 vel_0 = np.array([6.9e3, 0])
 
-step_size = 50
-steps = 200
+step_size = 120
+steps = 100
 
 legend_desc = [ "Forward Euler", "Backward Euler", "Runge-Kutta 2", "Runge-Kutta 4", "Hermite" ]
 integrators = [propag_forward_euler, propag_backward_euler, propag_rk2, propag_rk4, propag_hermite]
